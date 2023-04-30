@@ -55,14 +55,14 @@ contract SupplyChain {
         emit productPurchased(_productId,_productName);
     }
 
-    function changeAvailability(string memory _productName,uint _productId,bool _status) payable public {
+    function changeAvailability(string memory _productName,uint _productId,bool _status) public {
         Product storage product = products[_productName][_productId];
         require(getProductOwners(_productId,_productName)[product.owners.length-1] == msg.sender,"You are not the owner of this product");
         product.available = _status;
         emit productAvailability(_status);
     }
 
-    function changePrice(string memory _productName,uint _productId,uint _price) payable public {
+    function changePrice(string memory _productName,uint _productId,uint _price)  public {
         Product storage product = products[_productName][_productId];
         require(getProductOwners(_productId,_productName)[product.owners.length-1] == msg.sender,"You are not the owner of this product");
         product.price = _price*1e18;

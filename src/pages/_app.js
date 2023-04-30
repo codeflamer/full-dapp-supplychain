@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 import Web3Modal from "web3modal";
 import WalletConnectProvider from "@walletconnect/web3-provider";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function App({ Component, pageProps }) {
   const [account, setAccount] = useState(null);
@@ -36,9 +37,15 @@ export default function App({ Component, pageProps }) {
 
   return (
     <div>
-      <nav className=" mt-3 border-b-2 pb-4">
+      <nav className=" mt-3 border-b-2 pb-4 mb-3">
         <div className="flex justify-between mx-10 items-center">
-          <div className="">Decentralised Supply Chain</div>
+          <div className="">
+            <Link href="/">Decentralised Supply Chain</Link>
+          </div>
+          <div className="space-x-2">
+            <Link href="/profile">Profile</Link>
+            <Link href="/products">Products</Link>
+          </div>
           <div>
             {!account ? (
               <div>
@@ -56,7 +63,9 @@ export default function App({ Component, pageProps }) {
         </div>
       </nav>
 
-      <Component {...pageProps} />
+      <div className="mx-2">
+        <Component {...pageProps} />
+      </div>
     </div>
   );
 }
