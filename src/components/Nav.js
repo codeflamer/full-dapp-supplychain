@@ -24,20 +24,3 @@ const Nav = () => {
 };
 
 export default Nav;
-
-{
-  /* <div>
-            {!account ? (
-              <div>
-                <button
-                  onClick={connect}
-                  className="border border-blue-500 py-2 px-4 bg-blue-500  uppercase rounded-md text-white"
-                >
-                  Connect
-                </button>
-              </div>
-            ) : (
-              <p>{account}</p>
-            )}
-          </div> */
-}

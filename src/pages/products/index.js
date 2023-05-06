@@ -1,20 +1,38 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ListProducts from "@/components/ListProducts";
 import { contractAddress, ownerAddress } from "../../../contractdetails";
 import { ethers } from "ethers";
 
 import SupplyChain from "@/artifacts/contracts/SupplyChain.sol/SupplyChain.json";
+import { useAccount } from "wagmi";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
 
 const Products = ({ name, Addedproducts }) => {
+  const { isConnected } = useAccount();
+
+  const [products, setProducts] = useState(Addedproducts);
+  const [connected, setConnected] = useState();
+
+  useEffect(() => {
+    setConnected(isConnected);
+  }, [isConnected]);
+
   return (
     <>
       <h3 className="font-medium text-xl mb-2 text-center">
         This is a List of products belonging to{" "}
         <span className="italic">{name}</span>
       </h3>
-      <div className="">
-        <ListProducts Addedproducts={Addedproducts} />
-      </div>
+      {connected ? (
+        <div className="">
+          <ListProducts Addedproducts={products} />
+        </div>
+      ) : (
+        <div className="mt-10 flex flex-col justify-center items-center space-y-2">
+          You are not Connected To a wallet
+          <ConnectButton showBalance={false} className="mx-aut" />
+        </div>
+      )}
     </>
   );
 };

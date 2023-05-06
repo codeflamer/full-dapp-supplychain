@@ -35,34 +35,6 @@ const AddProduct = () => {
     },
   });
 
-  const addProductToSmartContract = async () => {
-    addProduct();
-    // if (typeof window.ethereum !== "undefined") {
-    //   const provider = new ethers.providers.Web3Provider(window.ethereum);
-    //   const signer = provider.getSigner();
-    //   let contract = new ethers.Contract(
-    //     contractAddress,
-    //     SupplyChain.abi,
-    //     signer
-    //   );
-    //   try {
-    //     const response = await contract.addProduct(
-    //       parseInt(addedProduct.productId),
-    //       addedProduct.productName,
-    //       parseInt(addedProduct.productPrice)
-    //     );
-    //     console.log("conract deployed", response);
-    //   } catch (e) {
-    //     console.log(e);
-    //   }
-    // }
-    // if (contract) {
-
-    // } else {
-    //   alert("Check if you have metamask installed!!");
-    // }
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(addedProduct);
@@ -84,10 +56,6 @@ const AddProduct = () => {
       return { ...prev, [name]: e.target.value };
     });
   };
-
-  // useEffect(() => {
-  //   setContract(CreateContract());
-  // }, []);
 
   return (
     <div className="w-full">

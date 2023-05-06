@@ -5,14 +5,17 @@ import SupplyChain from "@/artifacts/contracts/SupplyChain.sol/SupplyChain.json"
 import Image from "next/image";
 import Button from "@/components/Button";
 import Link from "next/link";
-import { CreateContract } from "utils/CreateContract";
 import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
 import { convertToEth } from "helpers/myHelpers";
 import { contractConfig } from "utils/constants";
+import toast, { Toaster } from "react-hot-toast";
+import { useRouter } from "next/router";
 
 const availabilityOptions = ["true", "false"];
 
 const Product = ({ name, product }) => {
+  const router = useRouter();
+
   const { address } = useAccount();
   const [walletAddress, setWalletAddress] = useState(false);
 
@@ -21,13 +24,24 @@ const Product = ({ name, product }) => {
   const [productAvailable, setProductAvailable] = useState(
     product.available ? "true" : "false"
   );
-  const [productPrice, setProductPrice] = useState();
+  const [productPrice, setProductPrice] = useState("20");
+
+  //refreshdata
+  const refreshData = () => {
+    router.replace(router.asPath);
+  };
 
   //wagmi buyProduct(string memory _productName, uint _productId)
   const { config: configBuy } = usePrepareContractWrite({
     chainId: 31337,
     address: contractAddress,
     abi: SupplyChain.abi,
+    functionName: "buyProduct",
+    args: [product.productName, parseInt(product.id)],
+    overrides: {
+      from: walletAddress,
+      value: ethers.utils.parseEther(String(convertToEth(product.price))),
+    },
   });
 
   const { config: configPrice } = usePrepareContractWrite({
@@ -49,17 +63,15 @@ const Product = ({ name, product }) => {
   //Buy product
   const { write: buyProduct, isLoading: buyLoading } = useContractWrite({
     ...configBuy,
-    functionName: "buyProduct",
-    args: [product.productName, parseInt(product.id)],
-    overrides: {
-      from: walletAddress,
-      value: ethers.utils.parseEther("20"),
-    },
+
     onError(error) {
       console.log("Error", error);
+      toast.error("An error occured");
     },
     onSuccess(data) {
       console.log("Success", data);
+      refreshData();
+      toast.success("Successfully Edited!");
     },
   });
 
@@ -70,9 +82,12 @@ const Product = ({ name, product }) => {
 
       onError(error) {
         console.log("Error", error);
+        toast.error("An error occured");
       },
       onSuccess(data) {
         console.log("Success", data);
+        refreshData();
+        toast.success("Successfully Edited!");
       },
     });
 
@@ -84,9 +99,12 @@ const Product = ({ name, product }) => {
     ...configAvailability,
     onError(error) {
       console.log("Error", error);
+      toast.error("An error occured");
     },
     onSuccess(data) {
       console.log("Success", data);
+      refreshData();
+      toast.success("Successfully Bought!");
     },
   });
 
@@ -122,6 +140,7 @@ const Product = ({ name, product }) => {
 
   return (
     <>
+      <Toaster />
       <Link href="/products">
         <span>+back to product</span>
       </Link>
@@ -161,7 +180,7 @@ const Product = ({ name, product }) => {
               <>
                 <Button
                   name="Edit Price"
-                  disabled={editingProductPrice}
+                  disabled={editingProductPrice | editingProductAvailability}
                   handleClick={() => {
                     setEditAvailability(false);
                     setEditPrice(true);
@@ -169,7 +188,7 @@ const Product = ({ name, product }) => {
                 />
                 <Button
                   name="Edit Availability"
-                  disabled={editingProductPrice}
+                  disabled={editingProductPrice | editingProductAvailability}
                   handleClick={() => {
                     setEditAvailability(true);
                     setEditPrice(false);
@@ -221,7 +240,11 @@ const Product = ({ name, product }) => {
               </>
             )}
 
-            <Button name="Edit" type="submit" disabled={editingProductPrice} />
+            <Button
+              name="Edit"
+              type="submit"
+              disabled={editingProductPrice | editingProductAvailability}
+            />
           </form>
         )}
       </section>
