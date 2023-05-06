@@ -8,14 +8,16 @@ import Button from "@/components/Button";
 
 const Profile = ({ name, Addedproducts }) => {
   return (
-    <section>
-      <h4>This is the profile page</h4>
-      <h5>List of My products:</h5>
-      <ListProducts Addedproducts={Addedproducts} />
-      <Link href="/profile/add-product">
-        <Button name="Add Product" />
-      </Link>
-    </section>
+    <>
+      <section>
+        <h4>This is the profile page</h4>
+        <h5>List of My products:</h5>
+        <ListProducts Addedproducts={Addedproducts} />
+        <Link href="/profile/add-product">
+          <Button name="Add Product" className="mt-2" />
+        </Link>
+      </section>
+    </>
   );
 };
 
@@ -39,7 +41,7 @@ export const getServerSideProps = async () => {
     provider
   );
   const data = await contract.companyName();
-  let productIds = await contract.getIdsProduct("iphone13");
+  let productIds = await contract.getIdsProduct("categoryA");
   productIds = productIds.map((productid) => {
     return productid.toString();
   });
@@ -47,7 +49,7 @@ export const getServerSideProps = async () => {
 
   const responses = await Promise.all(
     productIds.map(async (productId) => {
-      return await contract.getProduct(parseInt(productId), "iphone13");
+      return await contract.getProduct(parseInt(productId), "categoryA");
     })
   );
 

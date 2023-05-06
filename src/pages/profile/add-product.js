@@ -1,34 +1,66 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { CreateContract } from "utils/CreateContract";
-import { productCategory } from "utils/constants";
+
+import { contractConfig, productCategory } from "utils/constants";
+
+import { useContractWrite, usePrepareContractWrite } from "wagmi";
 
 const nullProduct = {
   productId: "1",
-  productName: "categoryA",
-  productPrice: "20",
+  productName: productCategory[0],
+  productPrice: "2",
 };
 
 const AddProduct = () => {
   const [addedProduct, setAddedProduct] = useState(nullProduct);
   const [contract, setContract] = useState();
 
+  const { config } = usePrepareContractWrite({
+    ...contractConfig,
+    functionName: "addProduct",
+    args: [
+      parseInt(addedProduct.productId),
+      addedProduct.productName,
+      parseInt(addedProduct.productPrice),
+    ],
+  });
+
+  const { write: addProduct, isLoading: addLoading } = useContractWrite({
+    ...config,
+    onError(error) {
+      console.log("Error", error);
+    },
+    onSuccess(data) {
+      console.log("Success", data);
+    },
+  });
+
   const addProductToSmartContract = async () => {
-    console.log(contract);
-    if (contract) {
-      try {
-        const response = await contract.addProduct(
-          parseInt(addedProduct.productId),
-          addedProduct.productName,
-          parseInt(addedProduct.productPrice)
-        );
-        console.log("conract deployed", response);
-      } catch (e) {
-        console.log(e);
-      }
-    } else {
-      alert("Check if you have metamask installed!!");
-    }
+    addProduct();
+    // if (typeof window.ethereum !== "undefined") {
+    //   const provider = new ethers.providers.Web3Provider(window.ethereum);
+    //   const signer = provider.getSigner();
+    //   let contract = new ethers.Contract(
+    //     contractAddress,
+    //     SupplyChain.abi,
+    //     signer
+    //   );
+    //   try {
+    //     const response = await contract.addProduct(
+    //       parseInt(addedProduct.productId),
+    //       addedProduct.productName,
+    //       parseInt(addedProduct.productPrice)
+    //     );
+    //     console.log("conract deployed", response);
+    //   } catch (e) {
+    //     console.log(e);
+    //   }
+    // }
+    // if (contract) {
+
+    // } else {
+    //   alert("Check if you have metamask installed!!");
+    // }
   };
 
   const handleSubmit = (e) => {
@@ -39,10 +71,10 @@ const AddProduct = () => {
       addedProduct.productName &&
       addedProduct.productPrice
     ) {
-      addProductToSmartContract();
+      addProduct();
       setAddedProduct(nullProduct);
     } else {
-      console.log("entert the arguments");
+      console.log("enter the arguments");
     }
   };
 
@@ -53,9 +85,9 @@ const AddProduct = () => {
     });
   };
 
-  useEffect(() => {
-    setContract(CreateContract());
-  }, []);
+  // useEffect(() => {
+  //   setContract(CreateContract());
+  // }, []);
 
   return (
     <div className="w-full">
@@ -109,7 +141,7 @@ const AddProduct = () => {
         </div>
 
         <div className="flex space-x-2">
-          <label name="product__price">Product Price</label>
+          <label name="product__price">Product Price ETH: </label>
           <input
             type="input"
             id="product__price"

@@ -6,17 +6,92 @@ import Image from "next/image";
 import Button from "@/components/Button";
 import Link from "next/link";
 import { CreateContract } from "utils/CreateContract";
+import { useAccount, useContractWrite, usePrepareContractWrite } from "wagmi";
+import { convertToEth } from "helpers/myHelpers";
+import { contractConfig } from "utils/constants";
 
 const availabilityOptions = ["true", "false"];
 
 const Product = ({ name, product }) => {
+  const { address } = useAccount();
+  const [walletAddress, setWalletAddress] = useState(false);
+
   const [editPrice, setEditPrice] = useState(false);
   const [editAvailability, setEditAvailability] = useState(false);
-  const [productAvailable, setProductAvailable] = useState(product.available);
-  const [productPrice, setProductPrice] = useState(product.price);
+  const [productAvailable, setProductAvailable] = useState(
+    product.available ? "true" : "false"
+  );
+  const [productPrice, setProductPrice] = useState();
 
-  //Functions
+  //wagmi buyProduct(string memory _productName, uint _productId)
+  const { config: configBuy } = usePrepareContractWrite({
+    chainId: 31337,
+    address: contractAddress,
+    abi: SupplyChain.abi,
+  });
+
+  const { config: configPrice } = usePrepareContractWrite({
+    ...contractConfig,
+    functionName: "changePrice",
+    args: [product.productName, product.id, parseInt(productPrice)],
+  });
+
+  const { config: configAvailability } = usePrepareContractWrite({
+    ...contractConfig,
+    functionName: "changeAvailability",
+    args: [
+      product.productName,
+      product.id,
+      productAvailable === "true" ? true : false,
+    ],
+  });
+
+  //Buy product
+  const { write: buyProduct, isLoading: buyLoading } = useContractWrite({
+    ...configBuy,
+    functionName: "buyProduct",
+    args: [product.productName, parseInt(product.id)],
+    overrides: {
+      from: walletAddress,
+      value: ethers.utils.parseEther("20"),
+    },
+    onError(error) {
+      console.log("Error", error);
+    },
+    onSuccess(data) {
+      console.log("Success", data);
+    },
+  });
+
+  //Edit Price
+  const { write: editProductPrice, isLoading: editingProductPrice } =
+    useContractWrite({
+      ...configPrice,
+
+      onError(error) {
+        console.log("Error", error);
+      },
+      onSuccess(data) {
+        console.log("Success", data);
+      },
+    });
+
+  //Edit Availability
+  const {
+    write: editProductAvailability,
+    isLoading: editingProductAvailability,
+  } = useContractWrite({
+    ...configAvailability,
+    onError(error) {
+      console.log("Error", error);
+    },
+    onSuccess(data) {
+      console.log("Success", data);
+    },
+  });
+
   const handlePriceChange = (e) => {
+    console.log(e.target.value);
     setProductPrice(e.target.value);
   };
 
@@ -28,35 +103,22 @@ const Product = ({ name, product }) => {
     e.preventDefault();
 
     if (editAvailability) {
-      console.log("productAvailable", productAvailable);
-      const contract = CreateContract();
-      try {
-        const response = await contract.changeAvailability(
-          product.productName,
-          product.id,
-          productAvailable === "true" ? true : false
-        );
-        console.log("response", response);
-      } catch (e) {
-        console.log(e);
-      }
+      console.log("productAvailable", typeof productAvailable);
+      editProductAvailability();
     }
 
     if (editPrice) {
-      console.log("productPrice", productPrice);
-      const contract = CreateContract();
-      try {
-        const response = await contract.changePrice(
-          product.productName,
-          product.id,
-          parseInt(productPrice)
-        );
-        console.log("response", response);
-      } catch (e) {
-        console.log(e);
-      }
+      editProductPrice();
     }
   };
+
+  useEffect(() => {
+    setWalletAddress(address);
+  }, [address]);
+
+  useEffect(() => {
+    setProductPrice(convertToEth(product.price));
+  }, [product.price]);
 
   return (
     <>
@@ -86,15 +148,20 @@ const Product = ({ name, product }) => {
               </span>
             ))}
           </div>
-          <div>Available: {product.available ? "True" : "Talse"}</div>
-          <div>Price: {product.price}</div>
+          <div>Available: {product.available ? "True" : "False"}</div>
+          <div>Price: {convertToEth(product.price)} ETH</div>
           <div className="flex space-x-2 mt-2">
-            {ownerAddress !== product.owners[product.owners.length - 1] ? (
-              <Button name="Buy" />
+            {walletAddress !== product.owners[product.owners.length - 1] ? (
+              <Button
+                name="Buy"
+                handleClick={() => buyProduct?.()}
+                disabled={buyLoading}
+              />
             ) : (
               <>
                 <Button
                   name="Edit Price"
+                  disabled={editingProductPrice}
                   handleClick={() => {
                     setEditAvailability(false);
                     setEditPrice(true);
@@ -102,6 +169,7 @@ const Product = ({ name, product }) => {
                 />
                 <Button
                   name="Edit Availability"
+                  disabled={editingProductPrice}
                   handleClick={() => {
                     setEditAvailability(true);
                     setEditPrice(false);
@@ -153,7 +221,7 @@ const Product = ({ name, product }) => {
               </>
             )}
 
-            <Button name="Edit" type="submit" />
+            <Button name="Edit" type="submit" disabled={editingProductPrice} />
           </form>
         )}
       </section>
@@ -164,7 +232,7 @@ const Product = ({ name, product }) => {
 export default Product;
 
 export const getServerSideProps = async ({ params }) => {
-  console.log("Params:", params.category);
+  // console.log("Params:", params.category);
   let provider;
   if (process.env.ENVIRONMENT === "local") {
     provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545/");

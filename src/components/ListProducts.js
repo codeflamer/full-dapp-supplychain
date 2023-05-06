@@ -1,3 +1,4 @@
+import { convertToEth } from "helpers/myHelpers";
 import Link from "next/link";
 import React from "react";
 
@@ -27,8 +28,8 @@ const ListProducts = ({ Addedproducts, category }) => {
                       </span>
                     ))}
                   </div>
-                  <div>available:{product.available ? "True" : "Talse"}</div>
-                  <div>price:{product.price}</div>
+                  <div>Available: {product.available ? "True" : "False"}</div>
+                  <div>Price: {convertToEth(product.price)} ETH</div>
                 </div>
               </Link>
             );
