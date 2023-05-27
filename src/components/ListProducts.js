@@ -32,7 +32,7 @@ const ListProducts = ({ Addedproducts, category }) => {
 
                   <div>id: {product.id}</div>
                   <div> name:{product.productName}</div>
-                  <div className="">
+                  {/* <div className="">
                     owners:
                     {product.owners.map((owner, i) => (
                       <span className="block" key={i}>
@@ -40,6 +40,16 @@ const ListProducts = ({ Addedproducts, category }) => {
                         {owner.slice(owner.length - 10)}{" "}
                       </span>
                     ))}
+                  </div> */}
+                  <div className="font-bold">
+                    Present owner:&nbsp;
+                    {product.owners[product.owners.length - 1].slice(
+                      0,
+                      15
+                    )} ...{" "}
+                    {product.owners[product.owners.length - 1].slice(
+                      product.owners[product.owners.length - 1].length - 10
+                    )}
                   </div>
                   <div>Available: {product.available ? "True" : "False"}</div>
                   <div>Price: {convertToEth(product.price)} ETH</div>

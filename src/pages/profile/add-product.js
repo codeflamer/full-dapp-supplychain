@@ -13,6 +13,7 @@ const nullProduct = {
 
 const AddProduct = () => {
   const [addedProduct, setAddedProduct] = useState(nullProduct);
+
   const [contract, setContract] = useState();
 
   const { config } = usePrepareContractWrite({

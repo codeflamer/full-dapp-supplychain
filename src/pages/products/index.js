@@ -6,12 +6,27 @@ import { ethers } from "ethers";
 import SupplyChain from "@/artifacts/contracts/SupplyChain.sol/SupplyChain.json";
 import { useAccount } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import SearchBar from "@/components/SearchBar";
 
 const Products = ({ name, Addedproducts }) => {
   const { isConnected } = useAccount();
 
   const [products, setProducts] = useState(Addedproducts);
   const [connected, setConnected] = useState();
+
+  //search values
+  const [searchValue, setSearchValue] = useState(null);
+  const [productData, setProductData] = useState(Addedproducts);
+
+  const handleSearch = () => {
+    console.log("clicking", searchValue);
+    if (!searchValue) {
+      return setProducts(productData);
+    }
+    setProducts((prev) => {
+      return productData.filter((product) => product.id == searchValue);
+    });
+  };
 
   useEffect(() => {
     setConnected(isConnected);
@@ -23,6 +38,13 @@ const Products = ({ name, Addedproducts }) => {
         This is a List of products belonging to{" "}
         <span className="italic">{name}</span>
       </h3>
+      <div className="flex flex-col items-center mt-5">
+        <SearchBar
+          setSearchValue={setSearchValue}
+          handleSearch={handleSearch}
+          searchValue={searchValue}
+        />
+      </div>
       {connected ? (
         <div className="">
           <ListProducts Addedproducts={products} />

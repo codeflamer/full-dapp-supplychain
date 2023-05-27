@@ -10,6 +10,8 @@ import { convertToEth } from "helpers/myHelpers";
 import { contractConfig } from "utils/constants";
 import toast, { Toaster } from "react-hot-toast";
 import { useRouter } from "next/router";
+import * as Dialog from "@radix-ui/react-dialog";
+import { Cross2Icon } from "@radix-ui/react-icons";
 
 const availabilityOptions = ["true", "false"];
 
@@ -119,7 +121,6 @@ const Product = ({ name, product }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (editAvailability) {
       console.log("productAvailable", typeof productAvailable);
       editProductAvailability();
@@ -201,6 +202,71 @@ const Product = ({ name, product }) => {
       </div>
 
       <section className="mt-4 ">
+        <section>
+          <Dialog.Root>
+            <Dialog.Trigger asChild>
+              <button
+                onClick={() => {
+                  setEditAvailability(false);
+                  setEditPrice(true);
+                }}
+                className="text-violet11 shadow-blackA7 hover:bg-mauve3 inline-flex h-[35px] items-center justify-center rounded-[4px] bg-white px-[15px] font-medium leading-none shadow-[0_2px_10px] focus:shadow-[0_0_0_2px] focus:shadow-black focus:outline-none"
+              >
+                Edit Price
+              </button>
+            </Dialog.Trigger>
+            <Dialog.Portal>
+              <Dialog.Overlay className="bg-black/50 data-[state=open]:animate-overlayShow fixed inset-0" />
+              <Dialog.Content className="data-[state=open]:animate-contentShow fixed top-[50%] left-[50%] max-h-[85vh] w-[90vw] max-w-[450px] translate-x-[-50%] translate-y-[-50%] rounded-[6px] bg-white p-[25px] shadow-[hsl(206_22%_7%_/_35%)_0px_10px_38px_-10px,_hsl(206_22%_7%_/_20%)_0px_10px_20px_-15px] focus:outline-none">
+                <Dialog.Title className="text-mauve12 m-0 text-[17px] font-medium">
+                  Edit Price
+                </Dialog.Title>
+
+                <fieldset className="mb-[15px] flex items-center gap-5 mt-3">
+                  <label
+                    className="text-violet11 w-[90px] text-right text-[15px]"
+                    htmlFor="name"
+                  >
+                    Price (Eth):
+                  </label>
+                  <input
+                    type="text"
+                    name="editPrice"
+                    id="editPrice"
+                    className="border border-black inline-flex w-full"
+                    value={productPrice}
+                    onChange={handlePriceChange}
+                  />
+                </fieldset>
+
+                <div className="mt-[25px] flex justify-end">
+                  <Dialog.Close asChild>
+                    <button
+                      onClick={(e) => handleSubmit(e)}
+                      disabled={
+                        editingProductPrice | editingProductAvailability
+                      }
+                      type="submit"
+                      className="bg-blue-400 text-white hover:bg-green5 focus:shadow-green7 inline-flex h-[35px] items-center justify-center rounded-[4px] px-[15px] font-medium leading-none focus:shadow-[0_0_0_2px] focus:outline-none"
+                    >
+                      Edit
+                    </button>
+                  </Dialog.Close>
+                </div>
+                <Dialog.Close asChild>
+                  <button
+                    className="text-violet11 hover:bg-violet4 focus:shadow-violet7 absolute top-[10px] right-[10px] inline-flex h-[25px] w-[25px] appearance-none items-center justify-center rounded-full focus:shadow-[0_0_0_2px] focus:outline-none"
+                    aria-label="Close"
+                  >
+                    <Cross2Icon />
+                  </button>
+                </Dialog.Close>
+              </Dialog.Content>
+            </Dialog.Portal>
+          </Dialog.Root>
+        </section>
+        {/* here */}
+
         {(editPrice || editAvailability) && (
           <form onSubmit={(e) => handleSubmit(e)}>
             {editPrice && (

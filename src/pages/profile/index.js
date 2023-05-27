@@ -6,8 +6,8 @@ import SupplyChain from "@/artifacts/contracts/SupplyChain.sol/SupplyChain.json"
 import Link from "next/link";
 import Button from "@/components/Button";
 import { useAccount } from "wagmi";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
 import NotConnected from "@/components/NotConnected";
+import SearchBar from "@/components/SearchBar";
 
 const Profile = () => {
   const { address, isConnected } = useAccount();
@@ -15,6 +15,10 @@ const Profile = () => {
   const [name, setName] = useState("");
   const [addedProducts, setAddedProducts] = useState([]);
   const [connected, setConnected] = useState();
+
+  //search values
+  const [searchValue, setSearchValue] = useState(null);
+  const [productData, setProductData] = useState(null);
 
   const handleFetchData = useCallback(async () => {
     let provider;
@@ -63,12 +67,25 @@ const Profile = () => {
     return { convertedResponses, data };
   }, [address]);
 
+  //prev.filter(product) => product.id!=searchValue
+
+  const handleSearch = () => {
+    console.log("clicking", searchValue);
+    if (!searchValue) {
+      return setAddedProducts(productData);
+    }
+    setAddedProducts((prev) => {
+      return productData.filter((product) => product.id == searchValue);
+    });
+  };
+
   useEffect(() => {
     if (isConnected) {
       (async () => {
         setLoading(true);
         const result = await handleFetchData();
         setAddedProducts(result.convertedResponses);
+        setProductData(result.convertedResponses);
         setName(result.name);
         setLoading(false);
       })();
@@ -87,12 +104,29 @@ const Profile = () => {
             "Loading ..."
           ) : (
             <>
-              <h4>This is the profile page</h4>
-              <h5>List of My products:</h5>
+              <h4 className="font-bold text-[30px] text-center">
+                This is the profile page
+              </h4>
+              <div className="flex flex-col items-center mt-5">
+                <SearchBar
+                  setSearchValue={setSearchValue}
+                  handleSearch={handleSearch}
+                  searchValue={searchValue}
+                />
+              </div>
+              <h5 className="mt-2 font-bold text-[20px]">
+                List of My products:
+              </h5>
               <ListProducts Addedproducts={addedProducts} />
-              <Link href="/profile/add-product">
-                <Button name="Add Product" className="mt-2" />
-              </Link>
+              {address == ownerAddress ? (
+                <Link href="/profile/add-product">
+                  <Button
+                    name="Add Product"
+                    className="mt-2"
+                    //handleClick={handleClick}
+                  />
+                </Link>
+              ) : null}
             </>
           )
         ) : (

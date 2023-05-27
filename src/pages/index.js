@@ -1,11 +1,9 @@
 import { Inter } from "next/font/google";
-import { useEffect, useState } from "react";
 import { contractAddress, ownerAddress } from "../../contractdetails";
 import { ethers } from "ethers";
-
 import SupplyChain from "@/artifacts/contracts/SupplyChain.sol/SupplyChain.json";
-import ListProducts from "@/components/ListProducts";
-import { CreateContract } from "utils/CreateContract";
+
+import * as Popover from "@radix-ui/react-popover";
 
 const inter = Inter({ subsets: ["latin"] });
 
